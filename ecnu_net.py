@@ -17,10 +17,7 @@ from typing import Sequence
 CONFIG_FILE_PATH = os.path.expanduser("~/.config/ecnu_net/config")
 DNS_SERVER = '202.120.80.2' # ECNU dns server
 TEST_URLS = ['http://ipv4.mirrors.ustc.edu.cn/',
-             'http://www.tsinghua.edu.cn',
-             'http://www.baidu.com',
-             'https://www.sina.com.cn/',
-             'https://www.qq.com/']
+             'http://mirrors4.tuna.tsinghua.edu.cn/']
 
 AC_ID = '4'
 LOGIN_URL = 'http://gateway.ecnu.edu.cn/srun_portal_pc.php?ac_id=' + str(AC_ID)
@@ -42,7 +39,7 @@ def send_request(postdata: dict):
     action_request = Request(url=LOGIN_URL, data=postdata)
     return urlopen(action_request).read()
 
-def internet_on(test_urls: Sequence[str] = None, pass_count=2):
+def internet_on(test_urls: Sequence[str] = None, pass_count=1, timeout=3):
     """
     check if internet is connected
 
@@ -54,16 +51,16 @@ def internet_on(test_urls: Sequence[str] = None, pass_count=2):
     if not test_urls:
         test_urls = TEST_URLS
 
-    def _internet_on(url):
+    def _internet_on(url, timeout):
         try:
-            urlopen(url, timeout=3)
+            urlopen(url, timeout=timeout)
             return True
         except (socket.timeout, URLError):
             return False
 
     on_count = 0
     for url in test_urls:
-        on_count += _internet_on(url)
+        on_count += _internet_on(url, timeout)
         if on_count == pass_count:
             return True  # return immediately
     return False
