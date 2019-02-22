@@ -16,8 +16,9 @@ from typing import Sequence
 
 CONFIG_FILE_PATH = os.path.expanduser("~/.config/ecnu_net/config")
 DNS_SERVER = '202.120.80.2' # ECNU dns server
-TEST_URLS = ['http://ipv4.mirrors.ustc.edu.cn/',
-             'http://mirrors4.tuna.tsinghua.edu.cn/']
+
+# Only when ipv4 network is connected can we connect urls in this list
+TEST_URLS = ['http://ipv4.mirrors.ustc.edu.cn/']
 
 AC_ID = '4'
 LOGIN_URL = 'http://gateway.ecnu.edu.cn/srun_portal_pc.php?ac_id=' + str(AC_ID)
@@ -104,7 +105,7 @@ class Loginer():
                 print("Success!")
             else:
                 print("Failed! please re-check the username and password")
-                if input("Continue? [y/N]") in ['y', 'Y', 'yes', 'YES']:
+                if input("Retry? [Y/n]") not in ['n', 'N', 'no', 'NO']:
                     self.logout() # infinite recursion until success
 
     def login(self):
@@ -120,7 +121,7 @@ class Loginer():
                 print("Success!")
             else:
                 print("Failed! please re-check the username and password")
-                if input("Continue? [y/N]") in ['y', 'Y', 'yes', 'YES']:
+                if input("Retry? [Y/n]") not in ['n', 'N', 'no', 'NO']:
                     self.login()  # infinite recursion until success
 
     def _write_config(self, ask_write_password=True):
