@@ -5,15 +5,23 @@ from urllib.request import urlopen, Request
 from urllib.parse import urlencode, quote_plus
 from urllib.error import URLError
 import socket
+
 from getpass import getpass
 import os
 import configparser
+
 from argparse import ArgumentParser
+from typing import Sequence
 
 
 CONFIG_FILE_PATH = os.path.expanduser("~/.config/ECNU-net/config")
-DNS_SERVER = '202.120.80.2'
-TEST_URL = 'http://ipv4.mirrors.ustc.edu.cn/'
+DNS_SERVER = '202.120.80.2' # ECNU dns server
+TEST_URLS = ['http://ipv4.mirrors.ustc.edu.cn/',
+             'http://www.tsinghua.edu.cn',
+             'http://www.baidu.com',
+             'https://www.sina.com.cn/',
+             'https://www.qq.com/']
+
 AC_ID = '4'
 LOGIN_URL = 'http://gateway.ecnu.edu.cn/srun_portal_pc.php?ac_id=' + str(AC_ID)
 
@@ -34,13 +42,31 @@ def send_request(postdata: dict):
     action_request = Request(url=LOGIN_URL, data=postdata)
     return urlopen(action_request).read()
 
-def internet_on():
-    """check if internet is connected"""
-    try:
-        urlopen(TEST_URL, timeout=3)
-        return True
-    except (socket.timeout, URLError):
-        return False
+def internet_on(test_urls: Sequence[str] = None, pass_count=2):
+    """
+    check if internet is connected
+
+    args
+    - test_urls : list of urls for test
+    - pass_count : if there're at least `pass_count` urls are connected,
+        the test passes
+    """
+    if not test_urls:
+        test_urls = TEST_URLS
+
+    def _internet_on(url):
+        try:
+            urlopen(url, timeout=3)
+            return True
+        except (socket.timeout, URLError):
+            return False
+
+    on_count = 0
+    for url in test_urls:
+        on_count += _internet_on(url)
+        if on_count == pass_count:
+            return True  # return immediately
+    return False
 
 def get_ip(dns=DNS_SERVER):
     """get the current ip address"""
@@ -113,7 +139,8 @@ class Loginer():
 
         config['user'] = data
 
-        if not os.path.isfile(CONFIG_FILE_PATH):
+        root_dir = os.path.split(CONFIG_FILE_PATH)[0]
+        if not os.path.isdir(root_dir):
             os.makedirs(os.path.split(CONFIG_FILE_PATH)[0])
         with open(CONFIG_FILE_PATH, 'w') as configfile:
             config.write(configfile)
@@ -121,11 +148,14 @@ class Loginer():
     def _read_config(self, force_reread=False):
         config = configparser.ConfigParser()
         has_config_file = config.read(CONFIG_FILE_PATH)
-        config = None if has_config_file else config['user']
+        if has_config_file:
+            config = config['user']
+        else:
+            config = None
 
         write_config = False
 
-        if config and not force_reread:
+        if config and (not force_reread):
             read_username = 'username' not in config.keys()
             read_password = 'password' not in config.keys()
             ask_write_password = False
