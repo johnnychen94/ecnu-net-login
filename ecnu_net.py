@@ -13,12 +13,25 @@ import configparser
 from argparse import ArgumentParser
 from typing import Sequence
 
+import math
+from random import shuffle
+
 
 CONFIG_FILE_PATH = os.path.expanduser("~/.config/ecnu_net/config")
 DNS_SERVER = '202.120.80.2' # ECNU dns server
 
 # Only when ipv4 network is connected can we connect urls in this list
-TEST_URLS = ['http://ipv4.mirrors.ustc.edu.cn/']
+TEST_URLS = ['https://www.baidu.com/',
+             'https://www.taobao.com/',
+             'https://www.amazon.cn/',
+             'https://www.jd.com/',
+             'https://github.com/',
+             'https://www.bing.com',
+             'http://www.cnki.net/',
+             'https://www.csdn.net/',
+             'https://gitee.com/',
+             'https://www.zhihu.com/',
+             'https://arxiv.org/']
 
 AC_ID = '4'
 LOGIN_URL = 'http://gateway.ecnu.edu.cn/srun_portal_pc.php?ac_id=' + str(AC_ID)
@@ -40,7 +53,7 @@ def send_request(postdata: dict):
     action_request = Request(url=LOGIN_URL, data=postdata)
     return urlopen(action_request).read()
 
-def internet_on(test_urls: Sequence[str] = None, pass_count=1, timeout=3):
+def internet_on(test_urls: Sequence[str] = None, pass_ratio=0.7, timeout=0.5):
     """
     check if internet is connected
 
@@ -51,6 +64,8 @@ def internet_on(test_urls: Sequence[str] = None, pass_count=1, timeout=3):
     """
     if not test_urls:
         test_urls = TEST_URLS
+    test_urls = test_urls.copy()
+    shuffle(test_urls)
 
     def _internet_on(url, timeout):
         try:
@@ -60,11 +75,17 @@ def internet_on(test_urls: Sequence[str] = None, pass_count=1, timeout=3):
             return False
 
     on_count = 0
+    off_count = 0
+    pass_count = math.floor(pass_ratio * len(test_urls))
+    fail_count = len(test_urls) - pass_count
     for url in test_urls:
-        on_count += _internet_on(url, timeout)
+        rst = _internet_on(url, timeout)
+        on_count += rst
+        off_count += 1-rst
         if on_count == pass_count:
             return True  # return immediately
-    return False
+        if off_count == fail_count:
+            return False
 
 def get_ip(dns=DNS_SERVER):
     """get the current ip address"""

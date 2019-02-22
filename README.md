@@ -29,6 +29,8 @@ chmod +x ~/.local/bin/ecnu_net
 
 - [ ] 更安全的密码存储策略
 - [ ] 模块化从而在python中直接调用
+- [ ] 更快的检查网络开断的工具
+- [ ] `TEST_URLS`移出仓库
 
 # F.A.Q:
 
