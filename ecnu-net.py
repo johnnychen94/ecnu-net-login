@@ -9,14 +9,14 @@ import configparser
 from argparse import ArgumentParser
 
 
-CONFIG_FILE_PATH = os.path.expanduser("~/.config/ECNULogin/config")
+CONFIG_FILE_PATH = os.path.expanduser("~/.config/ECNU-net/config")
 
 
 class Loginer():
     def __init__(self):
         self._read_config()
         self._ac_id = 4
-        self._loginUrl = 'http://gateway.ecnu.edu.cn/srun_portal_pc.php?ac_id=' + str(ac_id)
+        self._loginUrl = 'http://gateway.ecnu.edu.cn/srun_portal_pc.php?ac_id=' + str(self._ac_id)
         
         
     def logout(self):
