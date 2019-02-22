@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 from urllib.request import urlopen, Request
 from urllib.parse import urlencode, quote_plus
+from urllib.error import URLError
 import socket
 from getpass import getpass
 import os
@@ -125,9 +126,9 @@ class Loginer():
 
     def _internet_on(self):
         try:
-            urlopen('http://www.baiud.com', timeout=1)
+            urlopen('http://www.baiud.com', timeout=3)
             return True
-        except socket.timeout:
+        except (socket.timeout, URLError):
             return False
 
     @property
