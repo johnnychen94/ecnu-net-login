@@ -11,8 +11,8 @@
 # 安装
 
 ```
-git clone git@gitlab.ecnu.edu.cn:Johnnychen/ecnu-internet-login.git
-cp ecnu-internet-login/ecnu-net.py ~/.local/bin/ecnu-net
+git clone git@gitlab.ecnu.edu.cn:Johnnychen/ecnu-net-login.git
+cp ecnu-net-login/ecnu-net.py ~/.local/bin/ecnu-net
 chmod +x ~/.local/bin/ecnu-net
 ```
 

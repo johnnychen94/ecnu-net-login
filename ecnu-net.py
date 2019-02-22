@@ -1,7 +1,6 @@
-#! /usr/bin/python3 
+#! /usr/bin/python3
 from urllib.request import urlopen, Request
 from urllib.parse import urlencode, quote_plus
-from urllib.error import URLError
 import socket
 from getpass import getpass
 import os
@@ -17,8 +16,8 @@ class Loginer():
         self._read_config()
         self._ac_id = 4
         self._loginUrl = 'http://gateway.ecnu.edu.cn/srun_portal_pc.php?ac_id=' + str(self._ac_id)
-        
-        
+
+
     def logout(self):
         if not self._internet_on():
             print("Internet is already off, no ops.")
@@ -30,9 +29,9 @@ class Loginer():
                 'action': 'login',
                 'ac_id': self._ac_id,
                 'user_ip': self.ip,
-                'nas_ip':'',
-                'user_mac':'',
-                'url':''
+                'nas_ip': '',
+                'user_mac': '',
+                'url': ''
             }
             self._send_request(postdata)
 
@@ -44,7 +43,7 @@ class Loginer():
                 print("Failed! please re-check the username and password")
                 self._read_config(force_reread=True)
                 self.logout() # infinite recursion until success
-                
+
     def login(self):
         if self._internet_on():
             print("Internet is already on, no ops.")
@@ -55,9 +54,9 @@ class Loginer():
                 'action': 'login',
                 'ac_id': self._ac_id,
                 'user_ip': self.ip,
-                'nas_ip':'',
-                'user_mac':'',
-                'url':''
+                'nas_ip': '',
+                'user_mac': '',
+                'url': ''
             }
             self._send_request(postdata)
 
@@ -68,39 +67,41 @@ class Loginer():
             else:
                 print("Failed! please re-check the username and password")
                 self._read_config(force_reread=True)
-                self.login() # infinite recursion until success
-                
-    
+                self.login()  # infinite recursion until success
+
     def _send_request(self, postdata):
         postdata = urlencode(postdata, quote_via=quote_plus).encode("utf-8")
         myRequest = Request(url=self._loginUrl, data=postdata)
         return urlopen(myRequest).read()
-    
+
     def _write_config(self, ask_write_password=True):
         config = configparser.ConfigParser()
         data = {'username': self._username}
         if ask_write_password:
-            write_pass = input("write plain password? [y/N]") in ['y','Y','yes','YES']
+            write_pass = input("write plain password? [y/N]") in ['y', 'Y', 'yes', 'YES']
         else:
             write_pass = False
         if write_pass:
             print("Store plain password, Make sure nobody sees your password.")
             data['password'] = self._password
-            
+
         config['user'] = data
-        with open(CONFIG_FILE_PATH, 'w') as f:
-            config.write(f)
-    
+
+        if not os.path.isfile(CONFIG_FILE_PATH):
+            os.makedirs(os.path.split(CONFIG_FILE_PATH)[0])
+        with open(CONFIG_FILE_PATH, 'w') as configfile:
+            config.write(configfile)
+
     def _read_config(self, force_reread=False):
         config = configparser.ConfigParser()
         rst = config.read(CONFIG_FILE_PATH)
         config = None if len(rst)==0 else config['user']
-    
+
         write_config = False
-        
+
         if config and not force_reread:
-            read_username = not 'username' in config.keys()
-            read_password = not 'password' in config.keys()
+            read_username = 'username' not in config.keys()
+            read_password = 'password' not in config.keys()
             ask_write_password = False
         else:
             read_username = True
@@ -110,25 +111,25 @@ class Loginer():
         write_username = read_username
         write_password = read_password
         write_config = write_username or write_password
-        
+
         self._username = input("Student ID: ") if read_username else config['username']
         password = getpass("Password: ") if read_password else config['password']
-        again_password = getpass("Password: ") if read_password else config['password']
+        again_password = getpass("Type again: ") if read_password else config['password']
         if password == again_password:
             self._password = password
         else:
             raise ValueError("Two passwords don't match, try again.")
-        
+
         if write_config:
             self._write_config(ask_write_password)
-    
+
     def _internet_on(self):
         try:
             urlopen('http://www.baiud.com', timeout=1)
             return True
-        except socket.timeout as err: 
+        except socket.timeout:
             return False
-    
+
     @property
     def ip(self, dns='202.120.80.2'):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -158,5 +159,4 @@ if __name__=='__main__':
         exit()
 
     parser.print_help()
-    
 
