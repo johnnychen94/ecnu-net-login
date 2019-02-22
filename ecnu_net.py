@@ -1,4 +1,6 @@
 #! /usr/bin/python3
+"""ecnu_net: ECNU Internet Login/Logout module"""
+
 from urllib.request import urlopen, Request
 from urllib.parse import urlencode, quote_plus
 from urllib.error import URLError
@@ -10,70 +12,93 @@ from argparse import ArgumentParser
 
 
 CONFIG_FILE_PATH = os.path.expanduser("~/.config/ECNU-net/config")
+DNS_SERVER = '202.120.80.2'
+TEST_URL = 'http://ipv4.mirrors.ustc.edu.cn/'
+AC_ID = '4'
+LOGIN_URL = 'http://gateway.ecnu.edu.cn/srun_portal_pc.php?ac_id=' + str(AC_ID)
 
+POSTDATA_TEMPLATE = {
+    'username': '',
+    'password': '',
+    'action': 'login',
+    'ac_id': AC_ID,
+    'user_ip': '',
+    'nas_ip': '',
+    'user_mac': '',
+    'url': ''
+}
+
+def send_request(postdata: dict):
+    """send request filled with postdata"""
+    postdata = urlencode(postdata, quote_via=quote_plus).encode("utf-8")
+    action_request = Request(url=LOGIN_URL, data=postdata)
+    return urlopen(action_request).read()
+
+def internet_on():
+    """check if internet is connected"""
+    try:
+        urlopen(TEST_URL, timeout=3)
+        return True
+    except (socket.timeout, URLError):
+        return False
+
+def get_ip(dns=DNS_SERVER):
+    """get the current ip address"""
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as tmp_socket:
+        tmp_socket.connect((dns, 80))
+        ip_address = tmp_socket.getsockname()[0]
+    return ip_address
 
 class Loginer():
-    def __init__(self):
-        self._read_config()
-        self._ac_id = 4
-        self._loginUrl = 'http://gateway.ecnu.edu.cn/srun_portal_pc.php?ac_id=' + str(self._ac_id)
+    """ECNU network login class"""
+    def __init__(self, postdata, force_reread=False):
+        """
+        initialize Loginer instance
 
+        args
+        - force_reread : True to update/force_reread the config
+
+        methods:
+        - logout : logout internet
+        - login : login internet
+        """
+        self._read_config(force_reread)
+        self._postdata = postdata.copy()
+        self._postdata['username'] = self._username
+        self._postdata['password'] = self._password
 
     def logout(self):
-        if not self._internet_on():
+        """log out internet"""
+        if not internet_on():
             print("Internet is already off, no ops.")
         else:
             # send exactly same package as login
-            postdata = {
-                'username': self._username,
-                'password': self._password,
-                'action': 'login',
-                'ac_id': self._ac_id,
-                'user_ip': self.ip,
-                'nas_ip': '',
-                'user_mac': '',
-                'url': ''
-            }
-            self._send_request(postdata)
+            send_request(self._postdata)
 
             # the request result is useless, hence we
             # manually check internet connection
-            if not self._internet_on():
+            if not internet_on():
                 print("Success!")
             else:
                 print("Failed! please re-check the username and password")
-                self._read_config(force_reread=True)
-                self.logout() # infinite recursion until success
+                if input("Continue? [y/N]") in ['y', 'Y', 'yes', 'YES']:
+                    self.logout() # infinite recursion until success
 
     def login(self):
-        if self._internet_on():
+        """login internet"""
+        if internet_on():
             print("Internet is already on, no ops.")
         else:
-            postdata = {
-                'username': self._username,
-                'password': self._password,
-                'action': 'login',
-                'ac_id': self._ac_id,
-                'user_ip': self.ip,
-                'nas_ip': '',
-                'user_mac': '',
-                'url': ''
-            }
-            self._send_request(postdata)
+            send_request(self._postdata)
 
             # the request result is useless, hence we
             # manually check internet connection
-            if self._internet_on():
+            if internet_on():
                 print("Success!")
             else:
                 print("Failed! please re-check the username and password")
-                self._read_config(force_reread=True)
-                self.login()  # infinite recursion until success
-
-    def _send_request(self, postdata):
-        postdata = urlencode(postdata, quote_via=quote_plus).encode("utf-8")
-        myRequest = Request(url=self._loginUrl, data=postdata)
-        return urlopen(myRequest).read()
+                if input("Continue? [y/N]") in ['y', 'Y', 'yes', 'YES']:
+                    self.login()  # infinite recursion until success
 
     def _write_config(self, ask_write_password=True):
         config = configparser.ConfigParser()
@@ -95,8 +120,8 @@ class Loginer():
 
     def _read_config(self, force_reread=False):
         config = configparser.ConfigParser()
-        rst = config.read(CONFIG_FILE_PATH)
-        config = None if len(rst)==0 else config['user']
+        has_config_file = config.read(CONFIG_FILE_PATH)
+        config = None if has_config_file else config['user']
 
         write_config = False
 
@@ -124,40 +149,39 @@ class Loginer():
         if write_config:
             self._write_config(ask_write_password)
 
-    def _internet_on(self):
-        try:
-            urlopen('http://www.baiud.com', timeout=3)
-            return True
-        except (socket.timeout, URLError):
-            return False
-
-    @property
-    def ip(self, dns='202.120.80.2'):
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.connect((dns, 80))
-            ip = s.getsockname()[0]
-        return ip
-
 
 def login():
-    Loginer().login()
+    """login ECNU internet"""
+    Loginer(POSTDATA_TEMPLATE).login()
 def logout():
-    Loginer().logout()
+    """logout ECNU internet"""
+    Loginer(POSTDATA_TEMPLATE).logout()
+def update():
+    """update configuration"""
+    # update is done in initialization
+    Loginer(POSTDATA_TEMPLATE, force_reread=True)
 
 
-if __name__=='__main__':
+def main():
+    """main function of module ecnu_net"""
     parser = ArgumentParser(description='ECNU internet login/logout script')
-    parser.add_argument('--login', action='store_true', help='internet login')
-    parser.add_argument('--logout', action='store_true', help='internet login')
+    group_parser = parser.add_mutually_exclusive_group()
+    group_parser.add_argument('--login', action='store_true', help='internet login')
+    group_parser.add_argument('--logout', action='store_true', help='internet login')
+    group_parser.add_argument('--update', action='store_true', help='update configuration')
     args = parser.parse_args()
 
-    assert not(args.login == True == args.logout), "login or logout, not both."
     if args.login:
         login()
         exit()
     if args.logout:
         logout()
         exit()
+    if args.update:
+        update()
+        exit()
 
     parser.print_help()
 
+if __name__ == '__main__':
+    main()

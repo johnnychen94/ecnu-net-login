@@ -23,12 +23,11 @@ chmod +x ~/.local/bin/ecnu-net
 * 帮助: `ecnu-net`, `ecnu-net -h`
 * 联网: `ecnu-net --login`
 * 断网: `ecnu-net --logout`
+* 更新参数: `ecnu-net --update`
 
 # TODO:
 
-- [ ] 以参数的形式传递密码
 - [ ] 更安全的密码存储策略
-- [ ] 功能：更新配置文件
 - [ ] 模块化从而在python中直接调用
 
 # F.A.Q:
