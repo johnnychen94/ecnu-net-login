@@ -12,18 +12,18 @@
 
 ```
 git clone git@gitlab.ecnu.edu.cn:Johnnychen/ecnu-net-login.git
-cp ecnu-net-login/ecnu-net.py ~/.local/bin/ecnu-net
-chmod +x ~/.local/bin/ecnu-net
+cp ecnu-net-login/ecnu_net.py ~/.local/bin/ecnu_net
+chmod +x ~/.local/bin/ecnu_net
 ```
 
 # 使用
 
 第一次使用会记录学号与密码，后面则可以自动连接
 
-* 帮助: `ecnu-net`, `ecnu-net -h`
-* 联网: `ecnu-net --login`
-* 断网: `ecnu-net --logout`
-* 更新参数: `ecnu-net --update`
+* 帮助: `ecnu_net`, `ecnu_net -h`
+* 联网: `ecnu_net --login`
+* 断网: `ecnu_net --logout`
+* 更新参数: `ecnu_net --update`
 
 # TODO:
 
@@ -32,7 +32,7 @@ chmod +x ~/.local/bin/ecnu-net
 
 # F.A.Q:
 
-* 密码明文存储在~/.config/ECNU-net/config下
+* 密码明文存储在`~/.config/ecnu_net/config`下
 * 能否一直联网？
 
     有一个临时但满足绝大部分需求的解决办法：`nohup ping www.baidu.com &`

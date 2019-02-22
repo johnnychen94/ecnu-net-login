@@ -14,7 +14,7 @@ from argparse import ArgumentParser
 from typing import Sequence
 
 
-CONFIG_FILE_PATH = os.path.expanduser("~/.config/ECNU-net/config")
+CONFIG_FILE_PATH = os.path.expanduser("~/.config/ecnu_net/config")
 DNS_SERVER = '202.120.80.2' # ECNU dns server
 TEST_URLS = ['http://ipv4.mirrors.ustc.edu.cn/',
              'http://www.tsinghua.edu.cn',
