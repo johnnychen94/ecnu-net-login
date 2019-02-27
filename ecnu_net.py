@@ -12,6 +12,7 @@ import configparser
 
 from argparse import ArgumentParser
 from typing import Sequence
+from tqdm import tqdm
 
 import math
 from random import shuffle
@@ -53,7 +54,7 @@ def send_request(postdata: dict):
     action_request = Request(url=LOGIN_URL, data=postdata)
     return urlopen(action_request).read()
 
-def internet_on(test_urls: Sequence[str] = None, pass_ratio=0.7, timeout=0.5):
+def internet_on(test_urls: Sequence[str] = None, pass_ratio=0.7, timeout=0.5, verbose=True):
     """
     check if internet is connected
 
@@ -78,7 +79,14 @@ def internet_on(test_urls: Sequence[str] = None, pass_ratio=0.7, timeout=0.5):
     off_count = 0
     pass_count = math.floor(pass_ratio * len(test_urls))
     fail_count = len(test_urls) - pass_count
-    for url in test_urls:
+
+    def _get_test_urls(test_urls, verbose):
+        return tqdm(test_urls) if verbose else test_urls
+
+    if verbose:
+        print("check internet connection...")
+
+    for url in _get_test_urls(test_urls, verbose):
         rst = _internet_on(url, timeout)
         on_count += rst
         off_count += 1-rst
@@ -111,39 +119,38 @@ class Loginer():
         self._postdata = postdata.copy()
         self._postdata['username'] = self._username
         self._postdata['password'] = self._password
+        self._postdata['user_ip'] = get_ip(DNS_SERVER)
 
-    def logout(self):
+    def logout(self, verbose=True):
         """log out internet"""
-        if not internet_on():
+        if not internet_on(verbose=verbose):
             print("Internet is already off, no ops.")
         else:
             # send exactly same package as login
+            print("Logout...")
             send_request(self._postdata)
 
             # the request result is useless, hence we
             # manually check internet connection
-            if not internet_on():
+            if not internet_on(verbose=verbose):
                 print("Success!")
-            else:
-                print("Failed! please re-check the username and password")
-                if input("Retry? [Y/n]") not in ['n', 'N', 'no', 'NO']:
-                    self.logout() # infinite recursion until success
+            elif input("Failed! Retry? [Y/n]") not in ['n', 'N', 'no', 'NO']:
+                self.logout(verbose=verbose) # infinite recursion until success
 
-    def login(self):
+    def login(self, verbose=True):
         """login internet"""
-        if internet_on():
+        if internet_on(verbose=verbose):
             print("Internet is already on, no ops.")
         else:
+            print("Login...")
             send_request(self._postdata)
 
             # the request result is useless, hence we
             # manually check internet connection
-            if internet_on():
-                print("Success!")
-            else:
-                print("Failed! please re-check the username and password")
-                if input("Retry? [Y/n]") not in ['n', 'N', 'no', 'NO']:
-                    self.login()  # infinite recursion until success
+            if internet_on(verbose=verbose):
+               print("Success!")
+            elif input("Failed! Retry? [Y/n]") not in ['n', 'N', 'no', 'NO']: 
+                self.login(verbose=verbose)  # infinite recursion until success
 
     def _write_config(self, ask_write_password=True):
         config = configparser.ConfigParser()
@@ -187,6 +194,7 @@ class Loginer():
         write_password = read_password
         write_config = write_username or write_password
 
+        # read config from stdin
         self._username = input("Student ID: ") if read_username else config['username']
         password = getpass("Password: ") if read_password else config['password']
         again_password = getpass("Type again: ") if read_password else config['password']
@@ -199,12 +207,12 @@ class Loginer():
             self._write_config(ask_write_password)
 
 
-def login():
+def login(verbose):
     """login ECNU internet"""
-    Loginer(POSTDATA_TEMPLATE).login()
-def logout():
+    Loginer(POSTDATA_TEMPLATE).login(verbose=verbose)
+def logout(verbose):
     """logout ECNU internet"""
-    Loginer(POSTDATA_TEMPLATE).logout()
+    Loginer(POSTDATA_TEMPLATE).logout(verbose=verbose)
 def update():
     """update configuration"""
     # update is done in initialization
@@ -218,13 +226,14 @@ def main():
     group_parser.add_argument('--login', action='store_true', help='internet login')
     group_parser.add_argument('--logout', action='store_true', help='internet login')
     group_parser.add_argument('--update', action='store_true', help='update configuration')
+    parser.add_argument('--verbose', action='store_true', help='show detail information')
     args = parser.parse_args()
 
     if args.login:
-        login()
+        login(verbose=args.verbose)
         exit()
     if args.logout:
-        logout()
+        logout(verbose=args.verbose)
         exit()
     if args.update:
         update()
