@@ -1,6 +1,8 @@
 # ECNU Internet Login/Logout
 命令行登陆及注销华东师范大学网络验证系统<http://gateway.ecnu.edu.cn>
 
+注: 当前版本因为网络测试的原因可能会出现 实际上连接上但报错的情况
+
 # 背景
 
 * 一个ID(学号/工号)同时只能让五台设备连接外网，如果有第六台设备联网时，最先连接的那一台设备会被强制断网
@@ -11,7 +13,7 @@
 # 安装
 
 ```
-git clone git@gitlab.ecnu.edu.cn:Johnnychen/ecnu-net-login.git
+git clone http://222.204.244.229/Johnnychen/ecnu-net-login.git
 cp ecnu-net-login/ecnu_net.py ~/.local/bin/ecnu_net
 chmod +x ~/.local/bin/ecnu_net
 ```
