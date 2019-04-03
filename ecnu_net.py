@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#!/usr/bin/env python3
 """ecnu_net: ECNU Internet Login/Logout module"""
 
 from urllib.request import urlopen, Request
