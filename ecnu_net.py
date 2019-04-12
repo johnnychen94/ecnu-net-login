@@ -11,8 +11,6 @@ import os
 import configparser
 
 from argparse import ArgumentParser
-from typing import Sequence
-from tqdm import tqdm
 
 import math
 from random import shuffle
@@ -54,7 +52,7 @@ def send_request(postdata: dict):
     action_request = Request(url=LOGIN_URL, data=postdata)
     return urlopen(action_request).read()
 
-def internet_on(test_urls: Sequence[str] = None, pass_ratio=0.7, timeout=0.5, verbose=True):
+def internet_on(test_urls= None, pass_ratio=0.7, timeout=0.5, verbose=True):
     """
     check if internet is connected
 
@@ -81,7 +79,7 @@ def internet_on(test_urls: Sequence[str] = None, pass_ratio=0.7, timeout=0.5, ve
     fail_count = len(test_urls) - pass_count
 
     def _get_test_urls(test_urls, verbose):
-        return tqdm(test_urls) if verbose else test_urls
+        return test_urls
 
     if verbose:
         print("check internet connection...")
