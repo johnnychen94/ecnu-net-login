@@ -13,7 +13,7 @@
 # 安装
 
 ```
-git clone http://222.204.244.229/Johnnychen/ecnu-net-login.git
+git clone http://gitlab.lflab.cn/Johnnychen/ecnu-net-login.git
 cp ecnu-net-login/ecnu_net.py ~/.local/bin/ecnu_net
 chmod +x ~/.local/bin/ecnu_net
 ```
@@ -36,7 +36,7 @@ chmod +x ~/.local/bin/ecnu_net
 
 # F.A.Q:
 
-* 密码明文存储在`~/.config/ecnu_net/config`下
+* 密码**明文**存储在`~/.config/ecnu_net/config`下
 * 能否一直联网？
 
     有一个临时但满足绝大部分需求的解决办法：`nohup ping www.baidu.com &`
