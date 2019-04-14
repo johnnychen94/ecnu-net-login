@@ -35,7 +35,7 @@ chmod +x ~/.local/bin/ecnu_net
 
 2. 联网
 ```bash
-# git clone http://gitlab.lflab.cn/lflab/ecnu-net-login.git ~/ecnu-net-login
+git clone http://gitlab.lflab.cn/lflab/ecnu-net-login.git ~/ecnu-net-login
 ~/ecnu-net-login/ecnu_net.py --login
 apt update -q
 apt install iputils-ping -yq
