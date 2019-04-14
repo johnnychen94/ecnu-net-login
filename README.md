@@ -13,7 +13,7 @@
 # 安装
 
 ```
-git clone http://gitlab.lflab.cn/Johnnychen/ecnu-net-login.git
+git clone http://gitlab.lflab.cn/lflab/ecnu-net-login.git
 cp ecnu-net-login/ecnu_net.py ~/.local/bin/ecnu_net
 chmod +x ~/.local/bin/ecnu_net
 ```
