@@ -27,14 +27,29 @@ chmod +x ~/.local/bin/ecnu_net
 * 断网: `ecnu_net --logout`
 * 更新参数: `ecnu_net --update`
 
-# TODO:
+# Examples
+
+## 如何在docker容器中使用
+
+1. 进入容器：`docker exec -it <running-container> bash`
+
+2. 联网
+```bash
+# git clone http://gitlab.lflab.cn/lflab/ecnu-net-login.git ~/ecnu-net-login
+~/ecnu-net-login/ecnu_net.py --login
+apt update -q
+apt install iputils-ping -yq
+nohup ping www.baidu.com >> /dev/null &
+```
+
+# TODO
 
 - [ ] 更安全的密码存储策略
 - [ ] 模块化从而在python中直接调用
 - [ ] 更快的检查网络开断的工具
 - [ ] `TEST_URLS`移出仓库
 
-# F.A.Q:
+# F.A.Q
 
 * 密码**明文**存储在`~/.config/ecnu_net/config`下
 * 能否一直联网？
