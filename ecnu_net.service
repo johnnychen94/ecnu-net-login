@@ -1,0 +1,11 @@
+[Unit]
+Description=login ECNU gateway automatically
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/ecnu_net --login --daemon
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
