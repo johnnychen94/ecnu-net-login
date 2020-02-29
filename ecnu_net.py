@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
-"""ecnu_net: ECNU Internet Login/Logout module"""
+
+description = """
+ECNU internet login/logout script
+
+Copyright (C) Jiuning Chen <johnnychen94@hotmail.com>
+
+Distributed under terms of the MIT license.
+
+Repo: https://gitlab.lflab.cn/lflab/ecnu-net-login
+"""
 
 from urllib.request import urlopen, Request
 from urllib.parse import urlencode, quote_plus
@@ -7,6 +16,8 @@ from urllib.error import URLError
 import socket
 
 from getpass import getpass
+import time
+from datetime import datetime
 import os
 import configparser
 
@@ -24,12 +35,13 @@ TEST_URLS = ['https://www.baidu.com/',
              'https://www.taobao.com/',
              'https://www.amazon.cn/',
              'https://www.jd.com/',
-             'https://github.com/',
              'https://www.bing.com',
              'http://www.cnki.net/',
+             'https://www.qq.com/',
              'https://www.csdn.net/',
              'https://gitee.com/',
              'https://www.zhihu.com/',
+             'https://www.aliyun.com/',
              'https://arxiv.org/']
 
 AC_ID = '4'
@@ -52,7 +64,7 @@ def send_request(postdata: dict):
     action_request = Request(url=LOGIN_URL, data=postdata)
     return urlopen(action_request).read()
 
-def internet_on(test_urls= None, pass_ratio=0.7, timeout=0.5, verbose=True):
+def internet_on(test_urls= None, pass_ratio=0.6, timeout=1, verbose=True):
     """
     check if internet is connected
 
@@ -119,7 +131,7 @@ class Loginer():
         self._postdata['password'] = self._password
         self._postdata['user_ip'] = get_ip(DNS_SERVER)
 
-    def logout(self, verbose=True):
+    def logout(self, verbose=True, prompt=True):
         """log out internet"""
         if not internet_on(verbose=verbose):
             print("Internet is already off, no ops.")
@@ -132,10 +144,14 @@ class Loginer():
             # manually check internet connection
             if not internet_on(verbose=verbose):
                 print("Success!")
-            elif input("Failed! Retry? [Y/n]") not in ['n', 'N', 'no', 'NO']:
-                self.logout(verbose=verbose) # infinite recursion until success
+            elif prompt:
+                if input("Failed! Retry? [Y/n]") not in ['n', 'N', 'no', 'NO']:
+                    # infinite recursion until success
+                    self.logout(verbose=verbose)
+                else:
+                    print("Failed!")
 
-    def login(self, verbose=True):
+    def login(self, verbose=True, prompt=True):
         """login internet"""
         if internet_on(verbose=verbose):
             print("Internet is already on, no ops.")
@@ -147,14 +163,20 @@ class Loginer():
             # manually check internet connection
             if internet_on(verbose=verbose):
                print("Success!")
-            elif input("Failed! Retry? [Y/n]") not in ['n', 'N', 'no', 'NO']: 
-                self.login(verbose=verbose)  # infinite recursion until success
+            elif prompt:
+                if input("Failed! Retry? [Y/n]") not in ['n', 'N', 'no', 'NO']: 
+                    # infinite recursion until success
+                    self.login(verbose=verbose)
+                else:
+                    print("Failed!")
 
     def _write_config(self, ask_write_password=True):
         config = configparser.ConfigParser()
         data = {'username': self._username}
         if ask_write_password:
             write_pass = input("write plain password? [y/N]") in ['y', 'Y', 'yes', 'YES']
+            confirm = input("This can be risky if others have access to your data, are you sure?") in ['y', 'Y', 'yes', 'YES']
+            write_pass = write_pass and confirm
         else:
             write_pass = False
         if write_pass:
@@ -169,7 +191,7 @@ class Loginer():
         with open(CONFIG_FILE_PATH, 'w') as configfile:
             config.write(configfile)
 
-    def _read_config(self, force_reread=False):
+    def _read_config(self, force_reread=False, write_config=False):
         config = configparser.ConfigParser()
         has_config_file = config.read(CONFIG_FILE_PATH)
         if has_config_file:
@@ -205,12 +227,12 @@ class Loginer():
             self._write_config(ask_write_password)
 
 
-def login(verbose):
+def login(**kwargs):
     """login ECNU internet"""
-    Loginer(POSTDATA_TEMPLATE).login(verbose=verbose)
-def logout(verbose):
+    Loginer(POSTDATA_TEMPLATE).login(**kwargs)
+def logout(**kwargs):
     """logout ECNU internet"""
-    Loginer(POSTDATA_TEMPLATE).logout(verbose=verbose)
+    Loginer(POSTDATA_TEMPLATE).logout(**kwargs)
 def update():
     """update configuration"""
     # update is done in initialization
@@ -219,14 +241,28 @@ def update():
 
 def main():
     """main function of module ecnu_net"""
-    parser = ArgumentParser(description='ECNU internet login/logout script')
+    parser = ArgumentParser(description=description)
     group_parser = parser.add_mutually_exclusive_group()
     group_parser.add_argument('--login', action='store_true', help='internet login')
     group_parser.add_argument('--logout', action='store_true', help='internet login')
     group_parser.add_argument('--update', action='store_true', help='update configuration')
     parser.add_argument('--verbose', action='store_true', help='show detail information')
+    parser.add_argument('--daemon', action='store_true', help='login/logout as a daemon service')
+
     args = parser.parse_args()
 
+    if args.daemon:
+        while True:
+            print(datetime.now().ctime())
+            Loginer(POSTDATA_TEMPLATE, force_reread=False)
+            if args.update:
+                raise ValueError("update doesn't support daemon mode.")
+            if args.login:
+                login(verbose=args.verbose, prompt=False)
+            if args.logout:
+                logout(verbose=args.verbose, prompt=False)
+            time.sleep(120)
+    
     if args.login:
         login(verbose=args.verbose)
         exit()
