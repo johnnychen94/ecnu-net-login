@@ -82,7 +82,7 @@ def internet_on(test_urls= None, pass_ratio=0.6, timeout=1, verbose=True):
         try:
             urlopen(url, timeout=timeout)
             return True
-        except (socket.timeout, URLError):
+        except (socket.timeout, URLError, ConnectionResetError):
             return False
 
     on_count = 0
