@@ -3,11 +3,14 @@
 description = """
 ECNU internet login/logout script
 
-Copyright (C) Jiuning Chen <johnnychen94@hotmail.com>
+Copyright (C) 2019 Jiuning Chen <johnnychen94@hotmail.com>
 
 Distributed under terms of the MIT license.
 
-Repo: https://gitlab.lflab.cn/lflab/ecnu-net-login
+This script is hosted at both LAN and WAN network:
+
+* Github: https://github.com/johnnychen94/ecnu-net-login
+* Gitlab@LFLab.ECNU: https://gitlab.lflab.cn/lflab/ecnu-net-login
 """
 
 from urllib.request import urlopen, Request

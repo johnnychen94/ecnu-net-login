@@ -1,6 +1,11 @@
 # ECNU Internet Login/Logout
 命令行登陆及注销华东师范大学网络验证系统<http://gateway.ecnu.edu.cn>
 
+ECNU 内网及外网各提供一个版本，根据需要使用：
+
+* `Gitlab@LFLab.ECNU`: https://gitlab.lflab.cn/lflab/ecnu-net-login
+* `Github`: https://github.com/johnnychen94/ecnu-net-login
+
 注: 当前版本因为网络测试的原因可能会出现 实际上连接上但报错的情况
 
 # 背景
@@ -12,15 +17,16 @@
 
 # 安装
 
-```
-git clone http://gitlab.lflab.cn/lflab/ecnu-net-login.git
+```bash
+# bash
+git clone https://gitlab.lflab.cn/lflab/ecnu-net-login.git
 cp ecnu-net-login/ecnu_net.py ~/.local/bin/ecnu_net
 chmod +x ~/.local/bin/ecnu_net
 ```
 
 # 使用
 
-第一次使用会记录学号与密码，后面则可以自动连接
+第一次使用会记录学号与密码（也可以不存储），后面则可以自动连接
 
 * 帮助: `ecnu_net`, `ecnu_net -h`
 * 联网: `ecnu_net --login`
@@ -28,15 +34,17 @@ chmod +x ~/.local/bin/ecnu_net
 * 断网: `ecnu_net --logout`
 * 更新参数: `ecnu_net --update`
 
-后台运行daemon mode:
+## 后台运行 daemon mode
 
 `nohup ecnu_net --login --verbose --daemon >> ecnu_net.log 2>&1 &`
 
-利用systemctl部署:
+当然也可以用 tmux
+
+或者利用systemctl部署:
 
 ```bash
 # "安装" ecnu_net
-git clone http://gitlab.lflab.cn/lflab/ecnu-net-login.git
+git clone https://gitlab.lflab.cn/lflab/ecnu-net-login.git
 cp ecnu-net-login/ecnu_net.py /usr/local/bin/ecnu_net
 chmod a+x /usr/local/bin/ecnu_net
 
@@ -54,9 +62,9 @@ systemctl start ecnu_net
 
 # TODO
 
-- [ ] 模块化从而在python中直接调用
-- [ ] 更快的检查网络开断的工具
+- [ ] 更快的检查网络开断的工具 (多线程)
+- [ ] register to pypi?
 
 # F.A.Q
 
-* 密码**明文**存储在`~/.config/ecnu_net/config`下，请确保其他人没有对此的密码
+* 密码**明文**存储在`~/.config/ecnu_net/config`下，请确保其他人没有对此的权限
