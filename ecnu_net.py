@@ -256,15 +256,19 @@ def main():
 
     if args.daemon:
         while True:
-            print(datetime.now().ctime())
-            Loginer(POSTDATA_TEMPLATE, force_reread=False)
-            if args.update:
-                raise ValueError("update doesn't support daemon mode.")
-            if args.login:
-                login(verbose=args.verbose, prompt=False)
-            if args.logout:
-                logout(verbose=args.verbose, prompt=False)
-            time.sleep(120)
+            try:
+                print(datetime.now().ctime())
+                Loginer(POSTDATA_TEMPLATE, force_reread=False)
+                if args.update:
+                    raise ValueError("update doesn't support daemon mode.")
+                if args.login:
+                    login(verbose=args.verbose, prompt=False)
+                if args.logout:
+                    logout(verbose=args.verbose, prompt=False)
+            except OSError:
+                pass
+            finally: 
+                time.sleep(120)
     
     if args.login:
         login(verbose=args.verbose)
