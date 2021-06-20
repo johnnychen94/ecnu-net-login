@@ -1,5 +1,5 @@
 # ECNU Internet Login/Logout
-命令行登陆及注销华东师范大学网络验证系统<http://gateway.ecnu.edu.cn>
+命令行登陆及注销华东师范大学网络验证系统 <https://login.ecnu.edu.cn>
 
 ECNU 内网及外网各提供一个版本，根据需要使用：
 
