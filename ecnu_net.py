@@ -48,7 +48,7 @@ TEST_URLS = ['https://www.baidu.com/',
              'https://arxiv.org/']
 
 AC_ID = '4'
-LOGIN_URL = 'http://gateway.ecnu.edu.cn/srun_portal_pc.php?ac_id=' + str(AC_ID)
+LOGIN_URL = 'https://login.ecnu.edu.cn/srun_portal_pc.php?ac_id=' + str(AC_ID)
 
 POSTDATA_TEMPLATE = {
     'username': '',
