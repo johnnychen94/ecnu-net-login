@@ -31,7 +31,6 @@ from random import shuffle
 
 
 CONFIG_FILE_PATH = os.path.expanduser("~/.config/ecnu_net/config")
-DNS_SERVER = '202.120.80.2' # ECNU dns server
 
 # Only when ipv4 network is connected can we connect urls in this list
 TEST_URLS = ['https://www.baidu.com/',
@@ -51,14 +50,12 @@ AC_ID = '4'
 LOGIN_URL = 'https://login.ecnu.edu.cn/srun_portal_pc.php?ac_id=' + str(AC_ID)
 
 POSTDATA_TEMPLATE = {
+    'action':'login',
     'username': '',
     'password': '',
-    'action': 'login',
     'ac_id': AC_ID,
-    'user_ip': '',
-    'nas_ip': '',
-    'user_mac': '',
-    'url': ''
+    'save_me':'0',
+    'ajax':'1',
 }
 
 def send_request(postdata: dict):
@@ -108,13 +105,6 @@ def internet_on(test_urls= None, pass_ratio=0.6, timeout=1, verbose=True):
         if off_count == fail_count:
             return False
 
-def get_ip(dns=DNS_SERVER):
-    """get the current ip address"""
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as tmp_socket:
-        tmp_socket.connect((dns, 80))
-        ip_address = tmp_socket.getsockname()[0]
-    return ip_address
-
 class Loginer():
     """ECNU network login class"""
     def __init__(self, postdata, force_reread=False):
@@ -132,7 +122,6 @@ class Loginer():
         self._postdata = postdata.copy()
         self._postdata['username'] = self._username
         self._postdata['password'] = self._password
-        self._postdata['user_ip'] = get_ip(DNS_SERVER)
 
     def logout(self, verbose=True, prompt=True):
         """log out internet"""
